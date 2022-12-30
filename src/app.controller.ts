@@ -1,12 +1,14 @@
-import { Controller, Get } from "@nestjs/common"
-import { AppService } from "./app.service"
+import { Controller, Get, HttpCode } from "@nestjs/common"
+import AppService from "./app.service"
 
 @Controller()
-export class AppController {
-  constructor(private readonly appService: AppService) {}
+export default class AppController {
+  public constructor(private readonly appService: AppService) {}
 
-  @Get()
-  getHello(): string {
-    return this.appService.getHello()
-  }
+  /**
+   * Return successful no content to verify the microservice is online.
+   */
+  @Get("/ping")
+  @HttpCode(204)
+  public async ping(): Promise<void> {}
 }
