@@ -4,9 +4,9 @@ import {
   ExecutionContext,
   CallHandler
 } from "@nestjs/common"
+import { Response } from "express"
 import { Observable } from "rxjs"
 import { map } from "rxjs/operators"
-import Http from "src/utils/Http"
 
 /**
  * Standard format for HTTP responses to follow after passing through the
@@ -30,14 +30,13 @@ export default class TransformInterceptor<T>
     context: ExecutionContext,
     next: CallHandler
   ): Observable<IResponse<T>> {
-    const statusCode = context.switchToHttp().getResponse().statusCode
-    const success = statusCode >= 200 && statusCode < 300
+    const res: Response = context.switchToHttp().getResponse()
 
     return next.handle().pipe(
       map(data => ({
-        success,
-        statusCode,
-        statusMessage: Http.getStatusMessage(statusCode),
+        success: res.statusCode >= 200 && res.statusCode < 300,
+        statusCode: res.statusCode,
+        statusMessage: res.statusMessage,
         data: data ?? {}
       }))
     )
