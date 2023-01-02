@@ -1,4 +1,5 @@
 import { INestApplication } from "@nestjs/common"
+import HttpExceptionFilter from "src/interceptors/exception.filter"
 import TransformInterceptor from "src/interceptors/transform.interceptor"
 
 /**
@@ -8,4 +9,5 @@ import TransformInterceptor from "src/interceptors/transform.interceptor"
  */
 export default function configure(app: INestApplication) {
   app.useGlobalInterceptors(new TransformInterceptor())
+  app.useGlobalFilters(new HttpExceptionFilter())
 }

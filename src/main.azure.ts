@@ -1,6 +1,6 @@
 import { INestApplication } from "@nestjs/common"
 import { NestFactory } from "@nestjs/core"
-import { AppModule } from "./app.module"
+import AppModule from "./app.module"
 import configure from "./config/app.config"
 
 export async function createApp(): Promise<INestApplication> {

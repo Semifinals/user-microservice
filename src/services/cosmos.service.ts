@@ -6,6 +6,7 @@ import {
   Resource,
   SqlQuerySpec
 } from "@azure/cosmos"
+import * as https from "https"
 import { Injectable } from "@nestjs/common"
 
 @Injectable()
@@ -14,7 +15,8 @@ export default class CosmosService {
 
   public readonly client: CosmosClient = new CosmosClient({
     endpoint: process.env.COSMOS_ENDPOINT,
-    key: process.env.COSMOS_KEY
+    key: process.env.COSMOS_KEY,
+    agent: new https.Agent({ rejectUnauthorized: !process.env.DEV })
   })
 
   /**
@@ -57,6 +59,7 @@ export default class CosmosService {
     querySpec: string | SqlQuerySpec
   ): Promise<T[]> {
     const { resources } = await container.items.query(querySpec).fetchAll()
+
     return resources
   }
 
@@ -74,6 +77,7 @@ export default class CosmosService {
     partitionKeyValue: string
   ): Promise<T & Resource> {
     const { resource } = await container.item(id, partitionKeyValue).read()
+
     return resource
   }
 
@@ -91,6 +95,7 @@ export default class CosmosService {
     options?: RequestOptions
   ): Promise<T & Resource> {
     const { resource } = await container.items.create<T>(data, options)
+
     return resource
   }
 
@@ -108,6 +113,7 @@ export default class CosmosService {
     options?: RequestOptions
   ): Promise<T & Resource> {
     const { resource } = await container.items.upsert(data, options)
+
     return resource as T & Resource
   }
 
@@ -133,6 +139,7 @@ export default class CosmosService {
     const { resource } = await container
       .item(id, partitionKeyValue)
       .patch<T>({ operations, condition }, options)
+
     return resource
   }
 
@@ -149,7 +156,13 @@ export default class CosmosService {
     id: string,
     partitionKeyValue: string
   ): Promise<boolean> {
-    const { statusCode } = await container.item(id, partitionKeyValue).delete()
-    return statusCode === 204
+    try {
+      const { statusCode } = await container
+        .item(id, partitionKeyValue)
+        .delete()
+      return statusCode === 204
+    } catch (err) {
+      return false
+    }
   }
 }
